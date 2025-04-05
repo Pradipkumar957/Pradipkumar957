@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Library Management System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    form, #editForm {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    form input, #editForm input {
+      padding: 10px;
+      font-size: 16px;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    form button, #editForm button {
+      padding: 10px 20px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    form button:hover, #editForm button:hover {
+      background-color: #219150;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background-color: #e74c3c;
+      border: none;
+      padding: 6px 12px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .edit-btn {
+      background-color: #3498db;
+      border: none;
+      padding: 6px 12px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+
+    .edit-btn:hover {
+      background-color: #2980b9;
+    }
+
+    #searchBar {
+      width: 100%;
+      padding: 10px;
+      margin: 15px 0;
+      font-size: 16px;
+    }
+
+    .pagination {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .page-btn {
+      margin: 0 5px;
+      padding: 5px 10px;
+      border: none;
+      background-color: #ddd;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .page-btn.active {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      width: 300px;
+      border-radius: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .top-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .top-buttons button {
+      padding: 8px 12px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .top-buttons button:hover {
+      background-color: #1a252f;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="loginPage">
+    <h1>Login</h1>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <div class="container hidden" id="appPage">
+    <h1>Library Management System</h1>
+
+    <div class="top-buttons">
+      <input type="text" id="searchBar" placeholder="Search books..." />
+      <div>
+        <button id="exportCSV">Export CSV</button>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <form id="bookForm">
+      <input type="text" id="title" placeholder="Book Title" required />
+      <input type="text" id="author" placeholder="Author" required />
+      <input type="text" id="isbn" placeholder="ISBN" required />
+      <button type="submit">Add Book</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="title">Title 🔽</th>
+          <th data-sort="author">Author 🔽</th>
+          <th data-sort="isbn">ISBN 🔽</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="bookList"></tbody>
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Edit Book</h3>
+      <form id="editForm">
+        <input type="text" id="editTitle" required />
+        <input type="text" id="editAuthor" required />
+        <input type="text" id="editIsbn" required />
+        <input type="hidden" id="editIndex" />
+        <button type="submit">Update</button>
+        <button type="button" id="cancelEdit">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Login logic
+    const loginPage = document.getElementById('loginPage');
+    const appPage = document.getElementById('appPage');
+
+    if (localStorage.getItem('loggedIn')) {
+      loginPage.classList.add('hidden');
+      appPage.classList.remove('hidden');
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      if (user === 'admin' && pass === 'admin123') {
+        localStorage.setItem('loggedIn', 'true');
+        location.reload();
+      } else {
+        alert('Invalid credentials');
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('loggedIn');
+      location.reload();
+    }
+
+    // App logic
+    const form = document.getElementById('bookForm');
+    const bookList = document.getElementById('bookList');
+    const searchBar = document.getElementById('searchBar');
+    const exportBtn = document.getElementById('exportCSV');
+
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    const editTitle = document.getElementById('editTitle');
+    const editAuthor = document.getElementById('editAuthor');
+    const editIsbn = document.getElementById('editIsbn');
+    const editIndex = document.getElementById('editIndex');
+    const cancelEdit = document.getElementById('cancelEdit');
+
+    let books = JSON.parse(localStorage.getItem('books')) || [];
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    let sortField = null;
+    let sortDirection = 1;
+
+    const saveBooks = () => localStorage.setItem('books', JSON.stringify(books));
+
+    const sortBooks = (arr) => {
+      if (!sortField) return arr;
+      return [...arr].sort((a, b) => {
+        if (a[sortField] < b[sortField]) return -1 * sortDirection;
+        if (a[sortField] > b[sortField]) return 1 * sortDirection;
+        return 0;
+      });
+    };
+
+    const displayBooks = (filter = '') => {
+      bookList.innerHTML = '';
+      const filteredBooks = sortBooks(books.filter(book => {
+        const searchStr = `${book.title} ${book.author} ${book.isbn}`.toLowerCase();
+        return searchStr.includes(filter.toLowerCase());
+      }));
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const paginatedBooks = filteredBooks.slice(start, start + itemsPerPage);
+
+      paginatedBooks.forEach((book, i) => {
+        const actualIndex = books.indexOf(filteredBooks[start + i]);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${book.title}</td>
+          <td>${book.author}</td>
+          <td>${book.isbn}</td>
+          <td>
+            <button class="edit-btn" data-index="${actualIndex}">Edit</button>
+            <button class="delete-btn" data-index="${actualIndex}">Delete</button>
+          </td>
+        `;
+        bookList.appendChild(row);
+      });
+
+      renderPagination(filteredBooks);
+    };
+
+    const renderPagination = (filteredBooks) => {
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      const pageCount = Math.ceil(filteredBooks.length / itemsPerPage);
+
+      for (let i = 1; i <= pageCount; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.classList.add('page-btn');
+        if (i === currentPage) btn.classList.add('active');
+        btn.addEventListener('click', () => {
+          currentPage = i;
+          displayBooks(searchBar.value);
+        });
+        pagination.appendChild(btn);
+      }
+    };
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const title = form.title.value.trim();
+      const author = form.author.value.trim();
+      const isbn = form.isbn.value.trim();
+      if (title && author && isbn) {
+        books.push({ title, author, isbn });
+        saveBooks();
+        displayBooks(searchBar.value);
+        form.reset();
+      }
+    });
+
+    bookList.addEventListener('click', e => {
+      const index = e.target.getAttribute('data-index');
+      if (e.target.classList.contains('delete-btn')) {
+        books.splice(index, 1);
+        saveBooks();
+        displayBooks(searchBar.value);
+      }
+      if (e.target.classList.contains('edit-btn')) {
+        const book = books[index];
+        editTitle.value = book.title;
+        editAuthor.value = book.author;
+        editIsbn.value = book.isbn;
+        editIndex.value = index;
+        editModal.classList.remove('hidden');
+      }
+    });
+
+    editForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const index = editIndex.value;
+      books[index] = {
+        title: editTitle.value.trim(),
+        author: editAuthor.value.trim(),
+        isbn: editIsbn.value.trim(),
+      };
+      saveBooks();
+      displayBooks(searchBar.value);
+      editModal.classList.add('hidden');
+    });
+
+    cancelEdit.addEventListener('click', () => {
+      editModal.classList.add('hidden');
+    });
+
+    searchBar.addEventListener('input', () => {
+      currentPage = 1;
+      displayBooks(searchBar.value);
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const headers = ['Title', 'Author', 'ISBN'];
+      const rows = books.map(book => [book.title, book.author, book.isbn]);
+      const csv = 'data:text/csv;charset=utf-8,' + [headers, ...rows].map(e => e.join(',')).join('\n');
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csv));
+      link.setAttribute('download', 'library_books.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.getAttribute('data-sort');
+        if (sortField === field) sortDirection *= -1;
+        else {
+          sortField = field;
+          sortDirection = 1;
+        }
+        displayBooks(searchBar.value);
+      });
+    });
+
+    displayBooks();
+  </script>
+</body>
+</html>
