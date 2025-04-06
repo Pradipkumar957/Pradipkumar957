@@ -1,0 +1,59 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel LuxeStay</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section class="services-section">
+        <h2>Our Hotel Services</h2>
+        <div class="service-boxes">
+          <div class="service-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" alt="Room Service" width="60">
+            <h3>Room Service</h3>
+            <p>24/7 in-room dining with gourmet menu options.</p>
+          </div>
+          <div class="service-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/3065/3065286.png" alt="Spa & Wellness" width="60">
+            <h3>Spa & Wellness</h3>
+            <p>Relax with massages, sauna, and luxury spa treatments.</p>
+          </div>
+          <div class="service-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/2331/2331943.png" alt="Airport Shuttle" width="60">
+            <h3>Airport Shuttle</h3>
+            <p>Complimentary pickup and drop-off for our guests.</p>
+          </div>
+          <div class="service-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/947/947944.png" alt="Fitness Center" width="60">
+            <h3>Fitness Center</h3>
+            <p>Fully-equipped gym with modern cardio and weights.</p>
+          </div>
+        </div>
+      </section>
+      
+      <script>
+        // Optional animation on scroll
+        const serviceBoxes = document.querySelectorAll('.service-box');
+      
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = 1;
+              entry.target.style.transform = 'translateY(0)';
+            }
+          });
+        }, { threshold: 0.1 });
+      
+        serviceBoxes.forEach(box => {
+          box.style.opacity = 0;
+          box.style.transform = 'translateY(50px)';
+          box.style.transition = 'all 0.5s ease';
+          observer.observe(box);
+        });
+      </script>
+  <footer>
+    <p>&copy; 2025 LuxeStay Hotel</p>
+  </footer>
+</body>
+</html>

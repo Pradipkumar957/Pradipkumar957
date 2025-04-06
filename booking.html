@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Room Booking</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Book a Room</h2>
+  <form id="bookingForm">
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+    <input type="date" id="checkin" required>
+    <input type="date" id="checkout" required>
+    <select id="roomType" required>
+      <option value="">Select Room</option>
+      <option value="Single">Single</option>
+      <option value="Double">Double</option>
+      <option value="Deluxe">Deluxe</option>
+    </select>
+    <button type="submit">Submit</button>
+  </form>
+  <div id="bookingMsg"></div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
